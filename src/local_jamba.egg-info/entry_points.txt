@@ -1,0 +1,2 @@
+[console_scripts]
+jamba-chat = jamba_cli.cli:main

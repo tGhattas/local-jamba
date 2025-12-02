@@ -1,0 +1,40 @@
+Metadata-Version: 2.4
+Name: local-jamba
+Version: 0.1.0
+Summary: Playful CLI to chat with full PDFs using AI21 Jamba Reasoning 3B
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: huggingface-hub>=1.1.7
+Requires-Dist: llama-cpp-python>=0.2.92
+Requires-Dist: pypdf>=6.4.0
+Requires-Dist: requests>=2.32.5
+Requires-Dist: rich>=14.2.0
+
+## Jamba PDF Chat CLI
+
+Playful command-line interface for chatting with an entire PDF at once using AI21's Jamba Reasoning 3B (GGUF build). The CLI loads the whole document into the prompt (no RAG) to highlight the model's 128K+ context window.
+
+### Requirements
+
+- [uv](https://docs.astral.sh/uv/latest/) for environment management
+- macOS with Metal (recommended) or CPU fallback
+- Optional `HF_TOKEN` environment variable if your Hugging Face account is required for downloads
+
+### Setup
+
+```bash
+uv sync
+uv run scripts/setup_assets.py     # downloads the default OECD PDF + GGUF model
+uv run python -m jamba_cli.cli
+```
+
+Pass `--pdf` or `--model` to point at different files. Run `uv run jamba-chat --help` to see all knobs (context window, temperature, GPU layers, etc.).
+
+### CLI Shortcuts
+
+- `/quit` or `/exit` – leave the chat
+- `/history` – print the running conversation
+- `/reload` – reload the PDF from disk (useful when editing)
+- `/help` – show the command list
+
+By default the CLI hides `<think>` traces but still streams answers token-by-token. Use `--show-thinking` or `--no-stream` to change that behavior.
