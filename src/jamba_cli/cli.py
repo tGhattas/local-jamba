@@ -36,7 +36,7 @@ from prompt_toolkit.document import Document as PTDocument  # type: ignore[impor
 from prompt_toolkit.formatted_text import FormattedText  # type: ignore[import-not-found]
 from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore[import-not-found]
 from prompt_toolkit.styles import Style  # type: ignore[import-not-found]
-from rich.prompt import IntPrompt, Prompt  # type: ignore[import-not-found]
+from rich.prompt import Confirm, IntPrompt, Prompt  # type: ignore[import-not-found]
 from rich.table import Table  # type: ignore[import-not-found]
 from rich.text import Text  # type: ignore[import-not-found]
 from rich.theme import Theme  # type: ignore[import-not-found]
@@ -65,6 +65,7 @@ from .settings import (
     DEFAULT_TOP_P,
     SYSTEM_PROMPT,
 )
+from .setup_assets import main as setup_assets_main
 
 PLAYFUL_THEME = Theme(
     {
@@ -827,6 +828,56 @@ def interactive_setup(console: Console, store: IndexStore) -> SourceSelection:
     return SourceSelection(index=metadata[index_choice - 1].slug)
 
 
+def _needs_default_assets(args: argparse.Namespace) -> tuple[bool, bool]:
+    wants_default_model = Path(args.model) == DEFAULT_MODEL_PATH
+    missing_model = wants_default_model and not DEFAULT_MODEL_PATH.exists()
+
+    pdf_path = Path(args.pdf) if args.pdf else None
+    wants_default_pdf = (
+        pdf_path is not None
+        and pdf_path == DEFAULT_DOC_PATH
+        and not args.url
+        and not args.index
+    )
+    missing_pdf = wants_default_pdf and not DEFAULT_DOC_PATH.exists()
+
+    return missing_model, missing_pdf
+
+
+def _maybe_run_setup(console: Console, args: argparse.Namespace) -> None:
+    missing_model, missing_pdf = _needs_default_assets(args)
+    if not (missing_model or missing_pdf):
+        return
+
+    parts = []
+    if missing_model:
+        parts.append(f"model at [highlight]{DEFAULT_MODEL_PATH}[/highlight]")
+    if missing_pdf:
+        parts.append(f"sample PDF at [highlight]{DEFAULT_DOC_PATH}[/highlight]")
+    missing_text = " and ".join(parts)
+    console.print(
+        f"[warn]Missing required assets: {missing_text}. "
+        "Run `jash-setup` to download them?[/warn]"
+    )
+    if Confirm.ask("Run setup now?", default=True):
+        try:
+            setup_assets_main()
+        except KeyboardInterrupt:
+            console.print("\n[warn]Setup interrupted by user.[/warn]")
+        except Exception as exc:
+            console.print(f"[error]Setup failed: {exc}[/error]")
+    else:
+        console.print("[warn]Skipping automatic setup. You can run `jash-setup` later.[/warn]")
+
+    missing_model, missing_pdf = _needs_default_assets(args)
+    if missing_model or missing_pdf:
+        console.print(
+            "[error]Default assets are still missing. "
+            "Please run `jash-setup` before starting the chat.[/error]"
+        )
+        sys.exit(1)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     console = Console(theme=PLAYFUL_THEME)
@@ -843,6 +894,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.crawl_depth = selection.crawl_depth
         else:
             args.pdf = selection.pdf or DEFAULT_DOC_PATH
+
+    _maybe_run_setup(console, args)
 
     use_rag = args.rag if args.rag is not None else bool(args.url or args.index)
     rag_session: RAGSession | None = None

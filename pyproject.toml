@@ -1,6 +1,6 @@
 [project]
 name = "jambashrimp"
-version = "0.1.0"
+version = "0.1.1"
 description = "JambaShrimp (jash): playful CLI to chat with PDFs or crawled docs using Jamba Reasoning 3B"
 readme = "README.md"
 requires-python = ">=3.12"
