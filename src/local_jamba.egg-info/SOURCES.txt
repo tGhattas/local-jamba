@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 src/jamba_cli/__init__.py
 src/jamba_cli/cli.py
+src/jamba_cli/crawler.py
 src/jamba_cli/document.py
 src/jamba_cli/settings.py
 src/local_jamba.egg-info/PKG-INFO

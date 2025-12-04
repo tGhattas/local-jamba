@@ -1,6 +1,12 @@
-## Jamba PDF Chat CLI
+## JambaShrimp (`jash`)
 
-Playful command-line interface for chatting with an entire PDF at once using AI21's Jamba Reasoning 3B (GGUF build). The CLI loads the whole document into the prompt (no RAG) to highlight the model's 128K+ context window.
+Playful command-line interface for chatting with any PDF or crawled documentation site using AI21's Jamba Reasoning 3B (GGUF build). The CLI can:
+
+- load entire PDFs directly into the prompt for ad-hoc question answering
+- crawl documentation sites (recursively) and ground answers with a local FAISS index (RAG)
+- cache indexes per URL so you can come back later—even offline—and keep chatting
+
+The product name is **JambaShrimp**, and its CLI entry point is the shortened `jash`.
 
 ### Requirements
 
@@ -8,7 +14,29 @@ Playful command-line interface for chatting with an entire PDF at once using AI2
 - macOS with Metal (recommended) or CPU fallback
 - Optional `HF_TOKEN` environment variable if your Hugging Face account is required for downloads
 
-### Setup
+### Install with `pipx`
+
+Publishing the package (named `jambashrimp`) to PyPI lets anyone install the CLI with an isolated virtual environment:
+
+```bash
+pipx install jambashrimp
+
+# run it
+jash --help
+
+# download the sample PDF + model
+jash-setup
+```
+
+While developing locally you can point pipx directly at the repo:
+
+```bash
+pipx install --spec . jambashrimp
+```
+
+Assets are stored under `~/.jambashrimp/assets` when the package is installed globally. You can override `--model`/`--pdf` if you keep files elsewhere.
+
+### Dev Setup
 
 ```bash
 uv sync

@@ -2,8 +2,10 @@
 
 from importlib.metadata import version, PackageNotFoundError
 
+PACKAGE_NAME = "jambashrimp"
+
 try:
-    __version__ = version("local-jamba")
+    __version__ = version(PACKAGE_NAME)
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "0.0.0"
 

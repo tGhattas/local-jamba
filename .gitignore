@@ -4,4 +4,7 @@ __pycache__/
 assets/models/
 assets/docs/
 *.gguf
+build/
+dist/
+*.egg-info/
 
